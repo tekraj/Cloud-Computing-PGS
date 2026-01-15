@@ -34,8 +34,10 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     USE_X_FORWARDED_HOST = True
     USE_X_FORWARDED_PORT = True
-    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
-    CSRF_TRUSTED_ORIGINS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+    # Raw domains for ALLOWED_HOSTS
+    ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]
+    # Prefixed origins for CSRF_TRUSTED_ORIGINS
+    CSRF_TRUSTED_ORIGINS = [f"https://{host.strip()}" for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]
 
 # Application definition
 
