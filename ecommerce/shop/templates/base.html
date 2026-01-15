@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}My Site{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'bootstrap-5.3.8-dist/css/bootstrap.min.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">My Site</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% for item in nav_items %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/{{ item.url_slug }}">{{ item.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="py-4">
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="bg-dark text-white mt-5 py-4">
+    <div class="container text-center">
+        <p>&copy; 2024 My Site. All rights reserved.</p>
+    </div>
+</footer>
+
+{% load static %}
+<script src="{% static 'bootstrap-5.3.8-dist/js/bootstrap.min.js' %}"></script>
+</body>
+</html>
