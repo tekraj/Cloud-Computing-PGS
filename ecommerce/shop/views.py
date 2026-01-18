@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.http import HttpResponse
 from cms.models import Page
 from catalog.models import Product
 
@@ -23,3 +23,7 @@ def contact(request):
 
 def testimonials(request):
     return render(request, "testimonials.html")
+
+def health(request):
+    # Returning an empty HttpResponse defaults to status 200 OK
+    return HttpResponse("OK")
