@@ -32,26 +32,34 @@ if DEBUG:
 
 if not DEBUG:
     # 1. Trust the ALB headers
-    # The ALB sends 'https' in this header; Django uses this to know 
-    # the original request was secure even if the ALB talks to EC2 via HTTP.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
     # 2. Use forwarded headers for URL reconstruction
     USE_X_FORWARDED_HOST = True
     USE_X_FORWARDED_PORT = True
 
-    # 3. Security headers (Recommended when using ALB + SSL)
+    # 3. Security headers
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-    # 4. Host and Origin settings
+    # 4. EXEMPT Health Check from SSL Redirect
+    # This prevents the 301 redirect for the root or health path, 
+    # allowing ALB to get the 200 OK it needs.
+    SECURE_REDIRECT_EXEMPT = [
+        r'^$',        # Matches the root path '/'
+        r'^health/$'  # Matches '/health/' if you have a health endpoint
+    ]
+
+    # 5. Host and Origin settings
     ALLOWED_HOSTS = ['*']  
-    
-    # IMPORTANT: CSRF_TRUSTED_ORIGINS cannot be ['*']
-    # You MUST list your actual domain(s) here with the protocol.
-    CSRF_TRUSTED_ORIGINS = [f"https://{host.strip()}" for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]
-# Application definition
+
+    # 6. Improved CSRF logic
+    # This handles both a list of domains from ENV and prevents empty strings.
+    hosts_from_env = os.getenv('ALLOWED_HOSTS', '').split(',')
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{host.strip()}" for host in hosts_from_env if host.strip()
+    ]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
