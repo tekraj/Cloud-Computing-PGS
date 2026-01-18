@@ -36,7 +36,7 @@ ENV_FILE=".env"
 # Create (or overwrite) the .env file with the content
 cat <<EOF > $ENV_FILE
 SECRET_KEY=dsafdsafdsafdsa
-DEBUG=True
+DEBUG=False
 DB_HOST=localhost
 DB_NAME=ecommerce
 DB_USER=admin
