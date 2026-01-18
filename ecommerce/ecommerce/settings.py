@@ -30,6 +30,28 @@ if DEBUG:
     env_path = BASE_DIR.parent / '.env'
     load_dotenv(dotenv_path=env_path)
 
+if not DEBUG:
+    # 1. Trust the ALB headers
+    # The ALB sends 'https' in this header; Django uses this to know 
+    # the original request was secure even if the ALB talks to EC2 via HTTP.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # 2. Use forwarded headers for URL reconstruction
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
+
+    # 3. Security headers (Recommended when using ALB + SSL)
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # 4. Host and Origin settings
+    ALLOWED_HOSTS = ['*']  
+    
+    # IMPORTANT: CSRF_TRUSTED_ORIGINS cannot be ['*']
+    # You MUST list your actual domain(s) here with the protocol.
+    CSRF_TRUSTED_ORIGINS = [f"https://{host.strip()}" for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]
+# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",

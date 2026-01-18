@@ -42,6 +42,7 @@ DB_NAME=ecommerce
 DB_USER=admin
 DB_PORT=3306
 DB_PASSWORD=mauFJcuf5dhRMQrjj
+ALLOWED_HOSTS=localhost
 EOF
 
 echo "$ENV_FILE has been created with the specified configuration."
