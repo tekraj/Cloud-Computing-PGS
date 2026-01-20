@@ -49,5 +49,6 @@ echo "$ENV_FILE has been created with the specified configuration."
 
 # Ensure all files cloned as 'root' are now owned by 'ec2-user'
 chown -R ec2-user:ec2-user /home/ec2-user/Cloud-Computing-PGS
-docker compose up -d 
+docker compose build
+docker compose up -d
 
