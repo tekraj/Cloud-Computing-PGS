@@ -37,7 +37,7 @@ ENV_FILE=".env"
 cat <<EOF > $ENV_FILE
 SECRET_KEY=dsafdsafdsafdsa
 DEBUG=True
-DB_HOST=database-2.c4harpvynqqh.us-east-1.rds.amazonaws.com
+DB_HOST=database-1.cpum1y0g7b8g.us-east-1.rds.amazonaws.com
 DB_NAME=ecommerce
 DB_USER=admin
 DB_PORT=3306

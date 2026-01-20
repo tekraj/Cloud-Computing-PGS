@@ -175,45 +175,45 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- 2. Conditional Storage Logic ---
-if DEBUG:
+# if DEBUG:
     # LOCAL DEVELOPMENT
     # Store uploads inside your static folder
-    MEDIA_URL = 'media/' 
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = 'media/' 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-    # In Django 4.2+, explicitly define the local storage
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
-else:
-    # PRODUCTION (S3)
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+# In Django 4.2+, explicitly define the local storage
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+# else:
+#     # PRODUCTION (S3)
+#     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+#     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+#     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+#     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
     
-    # No query params in URLs (makes them cleaner/public)
-    AWS_QUERYSTRING_AUTH = False 
+#     # No query params in URLs (makes them cleaner/public)
+#     AWS_QUERYSTRING_AUTH = False 
     
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": {
-                "location": "media", # Folder name inside S3 bucket
-            },
-        },
-        "staticfiles": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": {
-                "location": "static",
-            },
-        },
-    }
-    # URLs will point to S3
-    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
-    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
+#     STORAGES = {
+#         "default": {
+#             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#             "OPTIONS": {
+#                 "location": "media", # Folder name inside S3 bucket
+#             },
+#         },
+#         "staticfiles": {
+#             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+#             "OPTIONS": {
+#                 "location": "static",
+#             },
+#         },
+#     }
+#     # URLs will point to S3
+#     MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
+#     STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
