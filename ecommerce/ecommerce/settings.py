@@ -32,30 +32,41 @@ if DEBUG:
     load_dotenv(dotenv_path=env_path)
 
 if not DEBUG:
+    # 1. Trust the ALB headers
     internal_ip = socket.gethostbyname(socket.gethostname())
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # 2. Use forwarded headers for URL reconstruction
     USE_X_FORWARDED_HOST = True
     USE_X_FORWARDED_PORT = True
-    # Raw domains for ALLOWED_HOSTS
-    ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')] 
-    try:
+
+    # 3. Security headers
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # 4. EXEMPT Health Check from SSL Redirect
+    # This prevents the 301 redirect for the root or health path, 
+    # allowing ALB to get the 200 OK it needs.
+    SECURE_REDIRECT_EXEMPT = [
+        r'^$',        # Matches the root path '/'
+        r'^health/$'  # Matches '/health/' if you have a health endpoint
+    ]
+
+    # 5. Host and Origin settings
+    ALLOWED_HOSTS = ['*']  
+
+    # 6. Improved CSRF logic
+    # This handles both a list of domains from ENV and prevents empty strings.
+    hosts_from_env = os.getenv('ALLOWED_HOSTS', '').split(',')
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{host.strip()}" for host in hosts_from_env if host.strip()
+    ]
+     try:
         container_ip = socket.gethostbyname(socket.gethostname())
         ALLOWED_HOSTS.append(container_ip)
     except Exception:
         pass
-    
-    try:
-        # Use a short timeout so it doesn't hang your app start-up
-        ec2_ip = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=2).text
-        ALLOWED_HOSTS.append(ec2_ip)
-    except Exception:
-        # This will fail on local dev, which is fine
-        pass
-    # Prefixed origins for CSRF_TRUSTED_ORIGINS
-    CSRF_TRUSTED_ORIGINS = [f"https://{host.strip()}" for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]+ [f"http://{internal_ip}"]
-
-# Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",

@@ -30,9 +30,24 @@ git clone https://github.com/tekraj/Cloud-Computing-PGS.git
 cd Cloud-Computing-PGS
 
 # 6. Setup environment and permissions
-if [ -f .env.example ]; then
-    cp .env.example .env
-fi
+# Define the target file
+ENV_FILE=".env"
+
+# Create (or overwrite) the .env file with the content
+cat <<EOF > $ENV_FILE
+SECRET_KEY=dsafdsafdsafdsa
+DEBUG=False
+DB_HOST=localhost
+DB_NAME=ecommerce
+DB_USER=admin
+DB_PORT=3306
+DB_PASSWORD=mauFJcuf5dhRMQrjj
+ALLOWED_HOSTS=localhost
+EOF
+
+echo "$ENV_FILE has been created with the specified configuration."
 
 # Ensure all files cloned as 'root' are now owned by 'ec2-user'
 chown -R ec2-user:ec2-user /home/ec2-user/Cloud-Computing-PGS
+docker compose up -d 
+

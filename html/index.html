@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    
+    <style>
+        /* Custom CSS to complement Bootstrap */
+        :root {
+            --primary-color: #0d6efd;
+            --dark-bg: #121212;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+            color: white;
+            padding: 100px 0;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .project-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">Tek Raj Pant</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#projects">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero-section">
+        <div class="container text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-3 fw-bold mb-3">Hi, I'm <span class="text-primary">Tek Raj Pant</span></h1>
+                    <p class="lead mb-4">I am a Senior Software Engineer specializing in building clean, functional, and user-friendly web applications.</p>
+                    <a href="#projects" class="btn btn-primary btn-lg px-4 me-md-2">View My Work</a>
+                    <a href="#contact" class="btn btn-outline-light btn-lg px-4">Contact Me</a>
+                </div>
+                <div class="col-md-6 text-center mt-5 mt-md-0">
+                   
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h2 class="fw-bold mb-4">About Me</h2>
+                    <p class="text-muted fs-5">
+                        I enjoy solving complex problems and turning ideas into reality using modern web technologies. 
+                        My journey in tech has focused on creating responsive layouts and optimized backends.
+                    </p>
+                    <div class="mt-4">
+                        <span class="badge bg-primary p-2 m-1">PHP</span>
+                        <span class="badge bg-primary p-2 m-1">Laravel</span>
+                        <span class="badge bg-primary p-2 m-1">Node.js</span>
+                        <span class="badge bg-primary p-2 m-1">Next.js</span>
+                        <span class="badge bg-primary p-2 m-1">NestJS</span>
+                        <span class="badge bg-primary p-2 m-1">React</span>
+                        <span class="badge bg-primary p-2 m-1">Angular</span>
+                        <span class="badge bg-primary p-2 m-1">Vue</span>
+                        <span class="badge bg-primary p-2 m-1">Java Spring Boot</span>
+                        <span class="badge bg-primary p-2 m-1">Python</span>
+                        <span class="badge bg-primary p-2 m-1">Django</span>
+                        <span class="badge bg-primary p-2 m-1">Flask</span>
+                        <span class="badge bg-primary p-2 m-1">Go</span>
+                        <span class="badge bg-primary p-2 m-1">Gin</span>
+                        <span class="badge bg-primary p-2 m-1">Docker</span>
+                        <span class="badge bg-primary p-2 m-1">Kubernetes</span>
+                        <span class="badge bg-primary p-2 m-1">Terraform</span>
+                        <span class="badge bg-primary p-2 m-1">CI/CD</span>
+                        <span class="badge bg-primary p-2 m-1">AI/ML</span>
+                        <span class="badge bg-primary p-2 m-1">TensorFlow</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-5">Featured Projects</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card project-card h-100 shadow-sm">
+                        <!-- <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Project 1"> -->
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Project One</h5>
+                            <p class="card-text text-muted">A brief description of this cool project you built.</p>
+                            <a href="#" class="btn btn-sm btn-primary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card project-card h-100 shadow-sm">
+                        <!-- <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Project 2"> -->
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Project Two</h5>
+                            <p class="card-text text-muted">A responsive application focusing on UX/UI design.</p>
+                            <a href="#" class="btn btn-sm btn-primary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card project-card h-100 shadow-sm">
+                        <!-- <img src="https://via.placeholder.com/400x250" class="card-img-top" alt="Project 3"> -->
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">Project Three</h5>
+                            <p class="card-text text-muted">A full-stack implementation using modern frameworks.</p>
+                            <a href="#" class="btn btn-sm btn-primary">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="bg-dark text-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Get In Touch</h2>
+                <p>Have a question or want to work together?</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <form>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Your Name">
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Your Email">
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" rows="5" placeholder="Your Message"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-0 text-muted">&copy; 2024 Tek Raj Pant. </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
