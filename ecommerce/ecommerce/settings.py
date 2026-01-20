@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
+import socket
+import requests
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,13 +32,27 @@ if DEBUG:
     load_dotenv(dotenv_path=env_path)
 
 if not DEBUG:
+    internal_ip = socket.gethostbyname(socket.gethostname())
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     USE_X_FORWARDED_HOST = True
     USE_X_FORWARDED_PORT = True
     # Raw domains for ALLOWED_HOSTS
-    ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]
+    ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')] 
+    try:
+        container_ip = socket.gethostbyname(socket.gethostname())
+        ALLOWED_HOSTS.append(container_ip)
+    except Exception:
+        pass
+    
+    try:
+        # Use a short timeout so it doesn't hang your app start-up
+        ec2_ip = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4', timeout=2).text
+        ALLOWED_HOSTS.append(ec2_ip)
+    except Exception:
+        # This will fail on local dev, which is fine
+        pass
     # Prefixed origins for CSRF_TRUSTED_ORIGINS
-    CSRF_TRUSTED_ORIGINS = [f"https://{host.strip()}" for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]
+    CSRF_TRUSTED_ORIGINS = [f"https://{host.strip()}" for host in os.getenv('ALLOWED_HOSTS', 'localhost').split(',')]+ [f"http://{internal_ip}"]
 
 # Application definition
 
