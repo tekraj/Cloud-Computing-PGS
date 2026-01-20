@@ -36,13 +36,13 @@ ENV_FILE=".env"
 # Create (or overwrite) the .env file with the content
 cat <<EOF > $ENV_FILE
 SECRET_KEY=dsafdsafdsafdsa
-DEBUG=False
-DB_HOST=localhost
+DEBUG=True
+DB_HOST=database-2.c4harpvynqqh.us-east-1.rds.amazonaws.com
 DB_NAME=ecommerce
 DB_USER=admin
 DB_PORT=3306
 DB_PASSWORD=mauFJcuf5dhRMQrjj
-ALLOWED_HOSTS=localhost
+ALLOWED_HOSTS=tekrajpant.com.np,apploadbalancer-1526489103.us-east-1.elb.amazonaws.com
 EOF
 
 echo "$ENV_FILE has been created with the specified configuration."

@@ -5,7 +5,8 @@ from catalog.models import Product
 
 def home(request):
     pages = Page.objects.all()
-    return render(request, "home.html", {"pages": pages})
+    featured_prods = Product.objects.all()[:3]
+    return render(request, "home.html", {"pages": pages,'featured_prods':featured_prods},)
 
 def product_list(request):
     products = Product.objects.all()

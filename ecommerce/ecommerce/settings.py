@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import socket
-import requests
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +32,7 @@ if DEBUG:
 
 if not DEBUG:
     # 1. Trust the ALB headers
-    internal_ip = socket.gethostbyname(socket.gethostname())
+    # The ALB terminates SSL and passes 'https' in this header
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     
     # 2. Use forwarded headers for URL reconstruction
@@ -46,27 +45,32 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
 
     # 4. EXEMPT Health Check from SSL Redirect
-    # This prevents the 301 redirect for the root or health path, 
-    # allowing ALB to get the 200 OK it needs.
+    # Crucial: ALB health checks usually happen over HTTP to the private IP.
+    # If redirected to HTTPS, the ALB might mark the instance as Unhealthy.
     SECURE_REDIRECT_EXEMPT = [
-        r'^$',        # Matches the root path '/'
-        r'^health/$'  # Matches '/health/' if you have a health endpoint
+        r'^health/$', 
+        r'^$',
     ]
 
     # 5. Host and Origin settings
-    ALLOWED_HOSTS = ['*']  
+    # We pull the actual domain (e.g., api.example.com) from ENV
+    env_hosts = os.getenv('ALLOWED_HOSTS', '').split(',')
+    ALLOWED_HOSTS = [host.strip() for host in env_hosts if host.strip()]
 
-    # 6. Improved CSRF logic
-    # This handles both a list of domains from ENV and prevents empty strings.
-    hosts_from_env = os.getenv('ALLOWED_HOSTS', '').split(',')
-    CSRF_TRUSTED_ORIGINS = [
-        f"https://{host.strip()}" for host in hosts_from_env if host.strip()
-    ]
-     try:
-        container_ip = socket.gethostbyname(socket.gethostname())
-        ALLOWED_HOSTS.append(container_ip)
+    # Internal Networking: Add the EC2 private IP to ALLOWED_HOSTS
+    # This is required for the ALB to communicate with the instance via IP
+    try:
+        private_ip = socket.gethostbyname(socket.gethostname())
+        if private_ip not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(private_ip)
     except Exception:
         pass
+
+    # 6. CSRF Trusted Origins
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{host.strip()}" for host in ALLOWED_HOSTS 
+        if not host.strip().replace('.', '').isdigit() # Exclude raw IPs
+    ]
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -169,3 +173,47 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# --- 2. Conditional Storage Logic ---
+if DEBUG:
+    # LOCAL DEVELOPMENT
+    # Store uploads inside your static folder
+    MEDIA_URL = 'media/' 
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+    # In Django 4.2+, explicitly define the local storage
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    # PRODUCTION (S3)
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+    
+    # No query params in URLs (makes them cleaner/public)
+    AWS_QUERYSTRING_AUTH = False 
+    
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "media", # Folder name inside S3 bucket
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "static",
+            },
+        },
+    }
+    # URLs will point to S3
+    MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
+    STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
