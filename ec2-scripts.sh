@@ -43,6 +43,7 @@ DB_USER=admin
 DB_PORT=3306
 DB_PASSWORD=mauFJcuf5dhRMQrjj
 ALLOWED_HOSTS=tekrajpant.com.np,apploadbalancer-1526489103.us-east-1.elb.amazonaws.com
+SERVER_NUMBER=1
 EOF
 
 echo "$ENV_FILE has been created with the specified configuration."

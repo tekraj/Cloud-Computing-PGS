@@ -218,3 +218,6 @@ STORAGES = {
 #     # URLs will point to S3
 #     MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
 #     STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
+
+
+SERVER_NUMBER=os.getenv('SERVER_NUMBER', '1')
