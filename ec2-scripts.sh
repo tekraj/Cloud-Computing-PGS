@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Redirect output to a log file so students can debug if it fails
+# Log location: /var/log/user-data.log
+exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+echo "Starting Deployment Script..."
+
 # 1. Update system and install base dependencies
 dnf update -y
 dnf install -y dnf-plugins-core git docker
@@ -8,33 +14,30 @@ dnf install -y dnf-plugins-core git docker
 systemctl enable --now docker
 
 # 3. Add ec2-user to docker group
-# Note: This takes effect on the NEXT login; the script continues as root
 usermod -aG docker ec2-user
 
 # 4. Install modern Docker Compose and Buildx plugins
-# This bypasses the Amazon Linux 2023 "buildx version 0.12" limitation
 dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
 sed -i 's/\$releasever/40/g' /etc/yum.repos.d/docker-ce.repo
 
-# Download and Force Install to resolve file conflicts with the default docker package
 dnf download -y docker-compose-plugin docker-buildx-plugin
 rpm -ivh --force docker-compose-plugin*.rpm docker-buildx-plugin*.rpm
-
-# Clean up installer files
 rm -f docker-compose-plugin*.rpm docker-buildx-plugin*.rpm
 
-# 5. Clone the repository
-# We use the absolute path to ensure we are in the correct home directory
-cd /home/ec2-user
-git clone https://github.com/tekraj/Cloud-Computing-PGS.git
-cd Cloud-Computing-PGS
+# 5. WAIT for Docker to be fully active
+# This prevents "Cannot connect to the Docker daemon" errors
+while ! docker info >/dev/null 2>&1; do 
+  echo "Waiting for Docker daemon..."
+  sleep 2
+done
 
-# 6. Setup environment and permissions
-# Define the target file
-ENV_FILE=".env"
+# 6. Clone the repository into a specific directory
+mkdir -p /home/ec2-user/app
+cd /home/ec2-user/app
+git clone https://github.com/tekraj/Cloud-Computing-PGS.git .
 
-# Create (or overwrite) the .env file with the content
-cat <<EOF > $ENV_FILE
+# 7. Setup environment variables
+cat <<EOF > .env
 SECRET_KEY=dsafdsafdsafdsa
 DEBUG=True
 DB_HOST=database-1.cpum1y0g7b8g.us-east-1.rds.amazonaws.com
@@ -42,15 +45,19 @@ DB_NAME=ecommerce
 DB_USER=admin
 DB_PORT=3306
 DB_PASSWORD=mauFJcuf5dhRMQrjj
-ALLOWED_HOSTS=tekrajpant.com.np,apploadbalancer-367849079.us-east-1.elb.amazonaws.com
+ALLOWED_HOSTS=*
 SERVER_NUMBER=3
+# Add S3 settings if your Django app uses them
+AWS_STORAGE_BUCKET_NAME=your-bucket-name
 EOF
-sed -i 's/<a class="navbar-brand fw-bold" href="#">Tek Raj Pant<\/a>/<a class="navbar-brand fw-bold" href="#">Server 1<\/a>/g' html/index.html
-sed -i 's/<span class="text-primary">Tek Raj Pant<\/span>/<span class="text-primary">Server 1<\/span>/g' html/index.html
-echo "$ENV_FILE has been created with the specified configuration."
 
-# Ensure all files cloned as 'root' are now owned by 'ec2-user'
-chown -R ec2-user:ec2-user /home/ec2-user/Cloud-Computing-PGS
+# 8. FIX PERMISSIONS BEFORE RUNNING DOCKER
+# Ensure ec2-user owns everything
+chown -R ec2-user:ec2-user /home/ec2-user/app
+
+# 9. RUN DOCKER AS ROOT (Since User Data runs as root)
+# We don't need to wait for a logout/login this way
 docker compose build
 docker compose up -d
 
+echo "Deployment Complete!"

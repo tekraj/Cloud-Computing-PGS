@@ -30,47 +30,23 @@ if DEBUG:
     env_path = BASE_DIR.parent / '.env'
     load_dotenv(dotenv_path=env_path)
 
-if not DEBUG:
-    # 1. Trust the ALB headers
-    # The ALB terminates SSL and passes 'https' in this header
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
-    # 2. Use forwarded headers for URL reconstruction
-    USE_X_FORWARDED_HOST = True
-    USE_X_FORWARDED_PORT = True
+import os
+import socket
 
-    # 3. Security headers
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
 
-    # 4. EXEMPT Health Check from SSL Redirect
-    # Crucial: ALB health checks usually happen over HTTP to the private IP.
-    # If redirected to HTTPS, the ALB might mark the instance as Unhealthy.
-    SECURE_REDIRECT_EXEMPT = [
-        r'^health/$', 
-        r'^$',
-    ]
+ALLOWED_HOSTS = ['*']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 
-    # 5. Host and Origin settings
-    # We pull the actual domain (e.g., api.example.com) from ENV
-    env_hosts = os.getenv('ALLOWED_HOSTS', '').split(',')
-    ALLOWED_HOSTS = [host.strip() for host in env_hosts if host.strip()]
+SECURE_SSL_REDIRECT = False 
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
-    # Internal Networking: Add the EC2 private IP to ALLOWED_HOSTS
-    # This is required for the ALB to communicate with the instance via IP
-    try:
-        private_ip = socket.gethostbyname(socket.gethostname())
-        if private_ip not in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.append(private_ip)
-    except Exception:
-        pass
-
-    # 6. CSRF Trusted Origins
-    CSRF_TRUSTED_ORIGINS = [
-        f"https://{host.strip()}" for host in ALLOWED_HOSTS 
-        if not host.strip().replace('.', '').isdigit() # Exclude raw IPs
-    ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.amazonaws.com', 
+    'http://*.amazonaws.com',
+]
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -78,6 +54,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "storages",
     "cms",
     "catalog",
     "shop",
@@ -176,48 +153,51 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- 2. Conditional Storage Logic ---
-# if DEBUG:
+if DEBUG:
     # LOCAL DEVELOPMENT
     # Store uploads inside your static folder
-MEDIA_URL = 'media/' 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = 'media/' 
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# In Django 4.2+, explicitly define the local storage
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
-# else:
-#     # PRODUCTION (S3)
-#     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-#     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-#     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-#     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+    # In Django 4.2+, explicitly define the local storage
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    # BUCKET SETTINGS
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
     
-#     # No query params in URLs (makes them cleaner/public)
-#     AWS_QUERYSTRING_AUTH = False 
-    
-#     STORAGES = {
-#         "default": {
-#             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-#             "OPTIONS": {
-#                 "location": "media", # Folder name inside S3 bucket
-#             },
-#         },
-#         "staticfiles": {
-#             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-#             "OPTIONS": {
-#                 "location": "static",
-#             },
-#         },
-#     }
-#     # URLs will point to S3
-#     MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
-#     STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
+    # IMPORTANT: Explicitly set keys to None to force boto3 
+    # to use the EC2 Instance Profile/IAM Role.
+    AWS_ACCESS_KEY_ID = None
+    AWS_SECRET_ACCESS_KEY = None
 
+    AWS_QUERYSTRING_AUTH = False 
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "media",
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "static",
+            },
+        },
+    }
+    
+    # Standard S3 URLs
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 SERVER_NUMBER=os.getenv('SERVER_NUMBER', '1')
