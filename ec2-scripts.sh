@@ -46,6 +46,7 @@ ALLOWED_HOSTS=tekrajpant.com.np,apploadbalancer-367849079.us-east-1.elb.amazonaw
 SERVER_NUMBER=3
 EOF
 sed -i 's/<a class="navbar-brand fw-bold" href="#">Tek Raj Pant<\/a>/<a class="navbar-brand fw-bold" href="#">Server 1<\/a>/g' html/index.html
+sed -i 's/<span class="text-primary">Tek Raj Pant<\/span>/<span class="text-primary">Server 1<\/span>/g' html/index.html
 echo "$ENV_FILE has been created with the specified configuration."
 
 # Ensure all files cloned as 'root' are now owned by 'ec2-user'

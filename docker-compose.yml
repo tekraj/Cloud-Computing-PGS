@@ -39,24 +39,14 @@ services:
 #     driver: bridge
 
 
-
-
-nginx:
+  nginx:
     image: nginx:latest
     ports:
-      - "80:80" 
+      - "80:80"
     volumes:
+      # Map your custom Nginx config
       - ./nginx:/etc/nginx/conf.d:ro
-      - static_volume:/usr/share/nginx/html/static:ro
-    depends_on:
-      - web
-    networks:
-      - webapp
+      # Map your local html folder directly to the Nginx serving directory
+      - ./html:/usr/share/nginx/html:ro
 
-volumes:
-  db_data:
-  static_volume:
-
-networks:
-  webapp:
-    driver: bridge
+# Simplified: Removed external volumes and networks for a st
