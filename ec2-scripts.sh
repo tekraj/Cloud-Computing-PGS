@@ -42,10 +42,10 @@ DB_NAME=ecommerce
 DB_USER=admin
 DB_PORT=3306
 DB_PASSWORD=mauFJcuf5dhRMQrjj
-ALLOWED_HOSTS=tekrajpant.com.np,apploadbalancer-1526489103.us-east-1.elb.amazonaws.com
-SERVER_NUMBER=1
+ALLOWED_HOSTS=tekrajpant.com.np,apploadbalancer-367849079.us-east-1.elb.amazonaws.com
+SERVER_NUMBER=3
 EOF
-
+sed -i 's/<a class="navbar-brand fw-bold" href="#">Tek Raj Pant<\/a>/<a class="navbar-brand fw-bold" href="#">Server 1<\/a>/g' html/index.html
 echo "$ENV_FILE has been created with the specified configuration."
 
 # Ensure all files cloned as 'root' are now owned by 'ec2-user'

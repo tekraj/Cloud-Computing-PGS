@@ -1,24 +1,47 @@
 services:
-  web:
-      build: .
-      env_file: .env
-      environment:
-        # Django looks for these specific names when using --noinput
-        - DJANGO_SUPERUSER_PASSWORD=mypassword123  
-        - DJANGO_SUPERUSER_USERNAME=admin
-        - DJANGO_SUPERUSER_EMAIL=admin@gmail.com
-      volumes:
-        - static_volume:/app/ecommerce/staticfiles
-      command: >
-        sh -c "python manage.py makemigrations &&
-              python manage.py migrate && 
-              python manage.py collectstatic --noinput && 
-              python manage.py createsuperuser --noinput || true &&
-              gunicorn --bind 0.0.0.0:8000 --workers 3 ecommerce.wsgi:application"
-      networks:
-        - webapp
+#   web:
+#       build: .
+#       env_file: .env
+#       environment:
+#         # Django looks for these specific names when using --noinput
+#         - DJANGO_SUPERUSER_PASSWORD=mypassword123  
+#         - DJANGO_SUPERUSER_USERNAME=admin
+#         - DJANGO_SUPERUSER_EMAIL=admin@gmail.com
+#       volumes:
+#         - static_volume:/app/ecommerce/staticfiles
+#       command: >
+#         sh -c "python manage.py makemigrations &&
+#               python manage.py migrate && 
+#               python manage.py collectstatic --noinput && 
+#               python manage.py createsuperuser --noinput || true &&
+#               gunicorn --bind 0.0.0.0:8000 --workers 3 ecommerce.wsgi:application"
+#       networks:
+#         - webapp
 
-  nginx:
+#   nginx:
+#     image: nginx:latest
+#     ports:
+#       - "80:80" 
+#     volumes:
+#       - ./nginx:/etc/nginx/conf.d:ro
+#       - static_volume:/usr/share/nginx/html/static:ro
+#     depends_on:
+#       - web
+#     networks:
+#       - webapp
+
+# volumes:
+#   db_data:
+#   static_volume:
+
+# networks:
+#   webapp:
+#     driver: bridge
+
+
+
+
+nginx:
     image: nginx:latest
     ports:
       - "80:80" 
@@ -37,7 +60,3 @@ volumes:
 networks:
   webapp:
     driver: bridge
-
-
-
-
