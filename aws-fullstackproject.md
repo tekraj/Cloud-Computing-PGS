@@ -53,8 +53,9 @@ Create three Security Groups in this order:
 ## Phase 3: Storage & Database
 
 ### 1. S3 Bucket
-* Create a bucket named `django-media-[student-name]`.
-* Enable Public Access.
+* Create a bucket named `djangomedia`.
+  - Disable object ownership
+  - enable public access
 
 ### 2. RDS MySQL (Free Tier)
 1.  **Subnet Group:** Create an RDS Subnet Group containing `Private-DB-1` and `Private-DB-2`.
@@ -71,15 +72,12 @@ Create three Security Groups in this order:
 
 ## Phase 4: Compute & Deployment
 
-### 1. IAM Role
-* Create an IAM Role for **EC2**.
-* Attach `AmazonS3FullAccess`.
-* Name it `EC2-S3-Role`.
 
-### 2. Launch EC2 Instances
+
+### 1. Launch EC2 Instances
 * **Quantity:** 2 Instances.
 * **Subnet:** `Private-App-1` and `Private-App-2`.
-* **IAM Role:** `EC2-S3-Role`.
+* **IAM Role:** Attach `LabRole` while creating EC2.
 * **Security Group:** `App-SG`.
 * **User Data:** Paste the script below (Update the `DB_HOST` and `AWS_STORAGE_BUCKET_NAME`).
 
@@ -126,7 +124,7 @@ git clone https://github.com/tekraj/Cloud-Computing-PGS.git .
 cat <<EOF > .env
 SECRET_KEY=dsafdsafdsafdsa
 DEBUG=True
-DB_HOST=[your db host name]
+DB_HOST=database-1.c4harpvynqqh.us-east-1.rds.amazonaws.com
 DB_NAME=ecommerce
 DB_USER=admin
 DB_PORT=3306
